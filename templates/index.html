@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio</title>
+
+
+</head>
+
+<body>
+    <div>
+        <form id="dates">
+            <p>Начальная дата:</p>
+            <input type="date" name="secondDate">
+            <p>Конечная дата:</p>
+            <input type="date" name="firstDate">
+            <br>
+            <button style="margin-top: 30px; margin-bottom: 20px" onclick="getPosts(); return false;">Проверить</button>
+            <button onclick="getBufferCopy(); return false;">В буфер обмена</button>
+        </form>
+        <textarea name="1" id="buffer-input" cols="30" rows="10"></textarea>
+        <div id="item-list"></div>
+    </div>
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script>
+
+        var globalVkInfo = ""
+        function printVk(items) {
+            items = items['result']
+            for (let i = 0; i < items.length; i++){
+                let sum = 0
+                output += 'vk.com/id' + items[i]['name'] + "<br>"
+                for (let j = 0; j < items[i]['post'].length; j++){
+                    let value = Object.values(items[i]['post'][j])
+                    sum += parseInt(value)
+                }
+                items[i]['likes_sum'] = sum
+            }
+            for (var i = 0, endI = items.length - 1; i < endI; i++) {
+                for (var j = 0, endJ = endI - i; j < endJ; j++) {
+                    if (items[j]['likes_sum'] > items[j + 1]['likes_sum']) {
+                        var swap = items[j];
+                        items[j] = items[j + 1];
+                        items[j + 1] = swap;
+                    }
+                }
+            }
+
+            items.reverse()
+            let output = "<div id='item-list'>"
+
+
+ 
+            for (let i = 0; i < items.length; i++){
+                globalVkInfo += i+1 + ') ' + '[id' + items[i]['name'] + '|' + items[i]['family'] + ']\n' + 'Likes: ' + items[i]['likes_sum'] + '\n'
+                output += i+1 + ')'+ '<a href="' + 'https://vk.com/id' + items[i]['name'] + '" target="_blank">' + 'https://vk.com/id' + items[i]['name'] + '</a>' + "<br>"
+                for (let j = 0; j < items[i]['post'].length; j++){
+                    let key = Object.keys(items[i]['post'][j])
+                    let value = Object.values(items[i]['post'][j])
+                    output += '<a href="https://vk.com/bauman_memes?w=wall' + key + '" target="_blank">' + 'https://vk.com/bauman_memes?w=wall' + key + '</a>' + " Likes: " + value + '<br>'
+                }
+                output += 'Likes sum:' + items[i]['likes_sum'] + '<br><br>'
+
+            }
+
+
+            output += "</div>"
+            $('#loading').remove()
+            $(output).appendTo("#dates")
+        }
+
+        function getPosts() {
+            $("<div id='loading'>Загрузка...</div>").appendTo("#dates")
+            let data = $('#dates').serialize()
+            $('#item-list').remove()
+            $.ajax({
+                url: "/VkPosts",
+                type: "GET",
+                dataType: 'json',
+                data: data,
+                success: (response) => {
+                    printVk(response)
+                },
+                error: (response) => {
+                    $('#loading').remove()
+                    alert('error')
+                }
+            })
+        }
+
+        function getBufferCopy() {
+            if (globalVkInfo === "") {
+                alert("Вы ничего не запросили")
+            } else {
+                $('#buffer-input').val(globalVkInfo)
+                let copyText = document.getElementById('buffer-input').select()
+                document.execCommand("copy")
+                alert("Текст скопирован")
+
+            }
+        }
+    </script>
+
+    
+</body>
+</html>

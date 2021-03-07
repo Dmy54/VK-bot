@@ -1,0 +1,5 @@
+123123123123123123123123
+
+# standalone только, получается для страницы отдельно, без id группы
+
+https://oauth.vk.com/authorize?client_id=your_id&display=page&scope=wall&response_type=token&v=5.126&state=123456
